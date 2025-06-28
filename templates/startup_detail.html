@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}{{ startup.name }} - StartupConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h1 class="mb-2">{{ startup.name }}</h1>
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <span class="badge bg-{{ 'success' if startup.stage == 'established' else 'warning' if startup.stage == 'scaling' else 'info' if startup.stage == 'mvp' else 'secondary' }}">
+                                    {{ startup.stage|title }}
+                                </span>
+                                <span class="badge bg-outline-primary">{{ startup.industry|title }}</span>
+                                <small class="text-muted">
+                                    <i data-feather="calendar" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    Created {{ startup.created_at.strftime('%B %Y') }}
+                                </small>
+                            </div>
+                            <div class="d-flex align-items-center text-muted">
+                                <i data-feather="map-pin" class="me-2" style="width: 16px; height: 16px;"></i>
+                                <span>{{ startup.location }}</span>
+                                {% if startup.website %}
+                                <span class="mx-2">•</span>
+                                <a href="{{ startup.website }}" target="_blank" class="text-decoration-none">
+                                    <i data-feather="external-link" class="me-1" style="width: 14px; height: 14px;"></i>
+                                    Website
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if can_connect %}
+                        <div>
+                            {% if show_form %}
+                            <button class="btn btn-primary" onclick="toggleConnectionForm()">
+                                <i data-feather="user-plus" class="me-2"></i>Connect
+                            </button>
+                            {% else %}
+                            <a href="{{ url_for('connect_startup', startup_id=startup.id) }}" class="btn btn-primary">
+                                <i data-feather="user-plus" class="me-2"></i>Connect
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Connection Form (if shown) -->
+                    {% if show_form and form %}
+                    <div id="connectionForm" class="card border border-primary mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i data-feather="message-circle" class="me-2"></i>Send Connection Request
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                {{ form.hidden_tag() }}
+                                <div class="mb-3">
+                                    <label for="{{ form.message.id }}" class="form-label">Message</label>
+                                    {{ form.message(class="form-control" + (" is-invalid" if form.message.errors else ""), rows="3", placeholder="Introduce yourself and explain why you'd like to connect...") }}
+                                    {% if form.message.errors %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.message.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex gap-2">
+                                    {{ form.submit(class="btn btn-primary") }}
+                                    <button type="button" class="btn btn-outline-secondary" onclick="toggleConnectionForm()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">About {{ startup.name }}</h4>
+                        <p class="lead">{{ startup.description }}</p>
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i data-feather="users" class="text-primary mb-2" style="width: 24px; height: 24px;"></i>
+                                    <h6 class="mb-1">Team Size</h6>
+                                    <p class="mb-0">{{ startup.team_size }} members</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i data-feather="dollar-sign" class="text-success mb-2" style="width: 24px; height: 24px;"></i>
+                                    <h6 class="mb-1">Funding Needed</h6>
+                                    <p class="mb-0">{{ startup.funding_needed }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if startup.revenue %}
+                        <div class="col-md-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i data-feather="trending-up" class="text-info mb-2" style="width: 24px; height: 24px;"></i>
+                                    <h6 class="mb-1">Revenue</h6>
+                                    <p class="mb-0">{{ startup.revenue }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- What They're Looking For -->
+                    <div class="mb-4">
+                        <h4 class="mb-3">Looking For</h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for item in startup.looking_for %}
+                            <span class="badge bg-primary fs-6 px-3 py-2">
+                                <i data-feather="{{ 'dollar-sign' if item == 'investors' else 'handshake' if item == 'partners' else 'tool' }}" class="me-2" style="width: 16px; height: 16px;"></i>
+                                {{ item|title }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Resources -->
+                    {% if startup.pitch_deck %}
+                    <div class="mb-4">
+                        <h4 class="mb-3">Resources</h4>
+                        <a href="{{ startup.pitch_deck }}" target="_blank" class="btn btn-outline-primary">
+                            <i data-feather="file-text" class="me-2"></i>View Pitch Deck
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Founder Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="user" class="me-2"></i>Founder
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i data-feather="user" class="text-white" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ founder.full_name }}</h6>
+                            <small class="text-muted">@{{ founder.username }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if founder.bio %}
+                    <p class="small text-muted mb-2">{{ founder.bio }}</p>
+                    {% endif %}
+                    
+                    <div class="d-flex align-items-center text-muted small">
+                        <i data-feather="map-pin" class="me-1" style="width: 14px; height: 14px;"></i>
+                        <span>{{ founder.location }}</span>
+                        {% if founder.industry %}
+                        <span class="mx-2">•</span>
+                        <span>{{ founder.industry|title }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Company Stats -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="bar-chart-2" class="me-2"></i>Quick Stats
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 border-end">
+                            <h5 class="mb-1 text-primary">{{ startup.stage|title }}</h5>
+                            <small class="text-muted">Stage</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="mb-1 text-success">{{ startup.team_size }}</h5>
+                            <small class="text-muted">Team</small>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Industry</small>
+                        <div>{{ startup.industry|title }}</div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted">Founded</small>
+                        <div>{{ startup.created_at.strftime('%B %Y') }}</div>
+                    </div>
+                    
+                    {% if startup.revenue %}
+                    <div>
+                        <small class="text-muted">Revenue</small>
+                        <div>{{ startup.revenue }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Contact Actions -->
+            {% if can_connect %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="message-circle" class="me-2"></i>Get in Touch
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('connect_startup', startup_id=startup.id) }}" class="btn btn-primary">
+                            <i data-feather="user-plus" class="me-2"></i>Send Connection Request
+                        </a>
+                        {% if get_current_user() %}
+                        <a href="{{ url_for('conversation', user_id=founder.id) }}" class="btn btn-outline-info">
+                            <i data-feather="message-circle" class="me-2"></i>Direct Message
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <p class="small text-muted mb-0">
+                        <i data-feather="info" class="me-1" style="width: 14px; height: 14px;"></i>
+                        Make meaningful connections that drive business growth.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleConnectionForm() {
+    const form = document.getElementById('connectionForm');
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+}
+</script>
+{% endblock %}

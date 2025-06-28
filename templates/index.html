@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold text-white mb-4">
+                    Connect Your Startup with Success
+                </h1>
+                <p class="lead text-white-50 mb-4">
+                    The premier platform for connecting innovative startups with investors, business partners, 
+                    and service providers. Build meaningful relationships that drive growth.
+                </p>
+                <div class="d-flex gap-3">
+                    {% if not session.user_id %}
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                        <i data-feather="user-plus" class="me-2"></i>Get Started
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('search') }}" class="btn btn-outline-light btn-lg">
+                        <i data-feather="search" class="me-2"></i>Explore Startups
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="position-relative">
+                    <i data-feather="trending-up" style="width: 200px; height: 200px;" class="text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container mb-5">
+    <div class="row text-center mb-5">
+        <div class="col-lg-8 mx-auto">
+            <h2 class="display-5 mb-3">How StartupConnect Works</h2>
+            <p class="lead text-muted">
+                Our platform makes it easy to discover opportunities and build valuable connections
+            </p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i data-feather="user-plus" class="text-primary" style="width: 48px; height: 48px;"></i>
+                    </div>
+                    <h5 class="card-title">Create Your Profile</h5>
+                    <p class="card-text text-muted">
+                        Sign up as a startup founder, investor, business partner, or service provider. 
+                        Build a comprehensive profile to showcase your expertise.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i data-feather="search" class="text-primary" style="width: 48px; height: 48px;"></i>
+                    </div>
+                    <h5 class="card-title">Discover Opportunities</h5>
+                    <p class="card-text text-muted">
+                        Browse and search through innovative startups. Filter by industry, stage, 
+                        and what they're looking for to find perfect matches.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i data-feather="users" class="text-primary" style="width: 48px; height: 48px;"></i>
+                    </div>
+                    <h5 class="card-title">Build Connections</h5>
+                    <p class="card-text text-muted">
+                        Send connection requests and start conversations. Build meaningful 
+                        relationships that drive business growth and success.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Types Section -->
+<section class="bg-dark py-5 mb-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 mb-3 text-white">Join Our Community</h2>
+                <p class="lead text-white-50">
+                    Whether you're building the next big thing or looking to invest in innovation
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i data-feather="zap" class="text-warning" style="width: 64px; height: 64px;"></i>
+                    </div>
+                    <h5 class="text-white mb-3">Startup Founders</h5>
+                    <p class="text-white-50">
+                        Showcase your startup and connect with investors, partners, and service providers
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i data-feather="dollar-sign" class="text-success" style="width: 64px; height: 64px;"></i>
+                    </div>
+                    <h5 class="text-white mb-3">Investors</h5>
+                    <p class="text-white-50">
+                        Discover promising startups and investment opportunities across industries
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i data-feather="handshake" class="text-info" style="width: 64px; height: 64px;"></i>
+                    </div>
+                    <h5 class="text-white mb-3">Business Partners</h5>
+                    <p class="text-white-50">
+                        Find strategic partnerships and collaboration opportunities
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i data-feather="tool" class="text-primary" style="width: 64px; height: 64px;"></i>
+                    </div>
+                    <h5 class="text-white mb-3">Service Providers</h5>
+                    <p class="text-white-50">
+                        Offer your expertise and services to growing startups
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Startups Section -->
+{% if startups %}
+<section class="container mb-5">
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h2 class="mb-3">Latest Startups</h2>
+            <p class="text-muted">Discover the newest companies looking for partnerships and investment</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="{{ url_for('search') }}" class="btn btn-outline-primary">
+                View All Startups <i data-feather="arrow-right" class="ms-1"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for startup in startups %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">{{ startup.name }}</h5>
+                        <span class="badge bg-secondary">{{ startup.stage|title }}</span>
+                    </div>
+                    
+                    <p class="card-text text-muted small mb-3">
+                        {{ startup.description[:120] }}{% if startup.description|length > 120 %}...{% endif %}
+                    </p>
+                    
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i data-feather="map-pin" class="me-1" style="width: 14px; height: 14px;"></i>
+                            {{ startup.location }}
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            <i data-feather="briefcase" class="me-1" style="width: 14px; height: 14px;"></i>
+                            {{ startup.industry|title }}
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {% for item in startup.looking_for %}
+                        <span class="badge bg-outline-primary me-1">{{ item|title }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="btn btn-outline-primary btn-sm">
+                        Learn More <i data-feather="arrow-right" class="ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+{% if not session.user_id %}
+<section class="bg-primary py-5">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 text-white mb-3">Ready to Get Started?</h2>
+                <p class="lead text-white-50 mb-4">
+                    Join thousands of entrepreneurs, investors, and business professionals building the future together.
+                </p>
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
+                    <i data-feather="user-plus" class="me-2"></i>Join StartupConnect Today
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Startups - StartupConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <h1 class="mb-2">Explore Startups</h1>
+            <p class="text-muted">Discover innovative startups looking for investors, partners, and service providers</p>
+        </div>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-lg-3">
+                    <label for="{{ form.query.id }}" class="form-label">Search Keywords</label>
+                    {{ form.query(class="form-control", placeholder="Search startups...") }}
+                </div>
+                
+                <div class="col-lg-2">
+                    <label for="{{ form.industry.id }}" class="form-label">Industry</label>
+                    {{ form.industry(class="form-select") }}
+                </div>
+                
+                <div class="col-lg-2">
+                    <label for="{{ form.stage.id }}" class="form-label">Stage</label>
+                    {{ form.stage(class="form-select") }}
+                </div>
+                
+                <div class="col-lg-3">
+                    <label for="{{ form.looking_for.id }}" class="form-label">Looking For</label>
+                    {{ form.looking_for(class="form-select") }}
+                </div>
+                
+                <div class="col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i data-feather="search" class="me-2"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    {% if startups %}
+                        {{ startups|length }} startup{{ 's' if startups|length != 1 else '' }} found
+                    {% else %}
+                        No startups found
+                    {% endif %}
+                </h5>
+                
+                {% if startups %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i data-feather="filter" class="me-1"></i>Sort by
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=newest">Newest first</a></li>
+                        <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=oldest">Oldest first</a></li>
+                        <li><a class="dropdown-item" href="?{{ request.query_string.decode() }}&sort=name">Name A-Z</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if startups %}
+    <div class="row g-4">
+        {% for startup in startups %}
+        <div class="col-lg-6 col-xl-4">
+            <div class="card h-100 border-0 shadow-sm startup-card">
+                <div class="card-body">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">
+                            <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="text-decoration-none">
+                                {{ startup.name }}
+                            </a>
+                        </h5>
+                        <span class="badge bg-{{ 'success' if startup.stage == 'established' else 'warning' if startup.stage == 'scaling' else 'info' if startup.stage == 'mvp' else 'secondary' }}">
+                            {{ startup.stage|title }}
+                        </span>
+                    </div>
+                    
+                    <!-- Description -->
+                    <p class="card-text text-muted mb-3">
+                        {{ startup.description[:120] }}{% if startup.description|length > 120 %}...{% endif %}
+                    </p>
+                    
+                    <!-- Meta Information -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center text-muted small mb-1">
+                            <i data-feather="map-pin" class="me-2" style="width: 14px; height: 14px;"></i>
+                            <span>{{ startup.location }}</span>
+                        </div>
+                        
+                        <div class="d-flex align-items-center text-muted small mb-1">
+                            <i data-feather="briefcase" class="me-2" style="width: 14px; height: 14px;"></i>
+                            <span>{{ startup.industry|title }}</span>
+                        </div>
+                        
+                        <div class="d-flex align-items-center text-muted small">
+                            <i data-feather="users" class="me-2" style="width: 14px; height: 14px;"></i>
+                            <span>{{ startup.team_size }} team members</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Looking For Tags -->
+                    <div class="mb-3">
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for item in startup.looking_for %}
+                            <span class="badge bg-outline-primary">
+                                <i data-feather="{{ 'dollar-sign' if item == 'investors' else 'handshake' if item == 'partners' else 'tool' }}" class="me-1" style="width: 12px; height: 12px;"></i>
+                                {{ item|title }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Funding Info -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <small class="text-muted">
+                            <i data-feather="dollar-sign" class="me-1" style="width: 14px; height: 14px;"></i>
+                            {{ startup.funding_needed }}
+                        </small>
+                        <small class="text-muted">
+                            {{ startup.created_at.strftime('%b %Y') }}
+                        </small>
+                    </div>
+                    
+                    <!-- Action Button -->
+                    <div class="d-grid">
+                        <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="btn btn-outline-primary">
+                            Learn More <i data-feather="arrow-right" class="ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Founder Info Footer -->
+                <div class="card-footer bg-transparent border-top">
+                    {% set founder = get_user_by_id(startup.founder_id) %}
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                            <i data-feather="user" class="text-white" style="width: 14px; height: 14px;"></i>
+                        </div>
+                        <div>
+                            <small class="fw-medium">{{ founder.full_name }}</small>
+                            <br>
+                            <small class="text-muted">{{ founder.user_type|title }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i data-feather="search" class="text-muted" style="width: 80px; height: 80px;"></i>
+        </div>
+        <h4 class="text-muted mb-3">No startups found</h4>
+        <p class="text-muted mb-4">
+            {% if request.args %}
+                Try adjusting your search criteria or clearing the filters.
+            {% else %}
+                No startups have been registered yet. Be the first to add your startup!
+            {% endif %}
+        </p>
+        
+        <div class="d-flex justify-content-center gap-3">
+            {% if request.args %}
+            <a href="{{ url_for('search') }}" class="btn btn-outline-primary">
+                <i data-feather="x" class="me-2"></i>Clear Filters
+            </a>
+            {% endif %}
+            
+            {% if session.user_id and get_current_user().user_type == 'founder' %}
+            <a href="{{ url_for('create_startup') }}" class="btn btn-primary">
+                <i data-feather="plus" class="me-2"></i>Add Your Startup
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.startup-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.startup-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - StartupConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-1">Welcome back, {{ user.full_name }}!</h1>
+                    <p class="text-muted mb-0">
+                        <span class="badge bg-{{ 'warning' if user.user_type == 'founder' else 'success' if user.user_type == 'investor' else 'info' if user.user_type == 'partner' else 'primary' }}">
+                            {{ user.user_type|title }}
+                        </span>
+                        • {{ user.location }} • {{ user.industry|title }}
+                    </p>
+                </div>
+                {% if user.user_type == 'founder' %}
+                <a href="{{ url_for('create_startup') }}" class="btn btn-primary">
+                    <i data-feather="plus" class="me-2"></i>Add Startup
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Statistics Cards -->
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i data-feather="briefcase" class="text-primary" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <h3 class="mb-1">{{ startups|length }}</h3>
+                    <p class="text-muted mb-0">My Startups</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i data-feather="users" class="text-success" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <h3 class="mb-1">{{ connections|length }}</h3>
+                    <p class="text-muted mb-0">Connections</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i data-feather="message-circle" class="text-info" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <h3 class="mb-1">{{ conversations|length }}</h3>
+                    <p class="text-muted mb-0">Conversations</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-2">
+                        <i data-feather="trending-up" class="text-warning" style="width: 32px; height: 32px;"></i>
+                    </div>
+                    <h3 class="mb-1">{{ ((connections|length + conversations|length + startups|length) * 1.2)|int }}</h3>
+                    <p class="text-muted mb-0">Profile Views</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <!-- My Startups -->
+        {% if user.user_type == 'founder' %}
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="briefcase" class="me-2"></i>My Startups
+                    </h5>
+                    <a href="{{ url_for('create_startup') }}" class="btn btn-outline-primary btn-sm">
+                        <i data-feather="plus" class="me-1"></i>Add New
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if startups %}
+                        {% for startup in startups %}
+                        <div class="d-flex justify-content-between align-items-start p-3 border-bottom">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="text-decoration-none">
+                                        {{ startup.name }}
+                                    </a>
+                                </h6>
+                                <p class="text-muted small mb-2">{{ startup.description[:100] }}...</p>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-secondary">{{ startup.stage|title }}</span>
+                                    <span class="badge bg-outline-primary">{{ startup.industry|title }}</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">{{ startup.created_at.strftime('%b %d') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="briefcase" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                            <h6 class="text-muted">No startups yet</h6>
+                            <p class="text-muted small">Create your first startup profile to get started</p>
+                            <a href="{{ url_for('create_startup') }}" class="btn btn-primary">
+                                <i data-feather="plus" class="me-2"></i>Create Startup
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Recommended Startups for non-founders -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="star" class="me-2"></i>Recommended for You
+                    </h5>
+                    <a href="{{ url_for('search') }}" class="btn btn-outline-primary btn-sm">
+                        <i data-feather="search" class="me-1"></i>Explore All
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% set recommended_startups = [] %}
+                    {% for startup in data_store.startups.values() %}
+                        {% if user.user_type in startup.looking_for %}
+                            {% set _ = recommended_startups.append(startup) %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if recommended_startups %}
+                        {% for startup in recommended_startups[:3] %}
+                        <div class="d-flex justify-content-between align-items-start p-3 border-bottom">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="text-decoration-none">
+                                        {{ startup.name }}
+                                    </a>
+                                </h6>
+                                <p class="text-muted small mb-2">{{ startup.description[:100] }}...</p>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-secondary">{{ startup.stage|title }}</span>
+                                    <span class="badge bg-success">Looking for {{ user.user_type|title }}s</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="btn btn-outline-primary btn-sm">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="search" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                            <h6 class="text-muted">No recommendations yet</h6>
+                            <p class="text-muted small">Explore startups to find opportunities</p>
+                            <a href="{{ url_for('search') }}" class="btn btn-primary">
+                                <i data-feather="search" class="me-2"></i>Browse Startups
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Activity -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="activity" class="me-2"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% set recent_connections = connections[-5:] %}
+                    {% if recent_connections %}
+                        {% for connection in recent_connections %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i data-feather="user-plus" class="text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-0 small">
+                                    {% if connection.sender_id == user.id %}
+                                        You sent a connection request
+                                    {% else %}
+                                        You received a connection request
+                                    {% endif %}
+                                </p>
+                                <small class="text-muted">{{ connection.created_at.strftime('%b %d, %Y') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="activity" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                            <p class="text-muted small mb-0">No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="zap" class="me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('search') }}" class="btn btn-outline-primary">
+                            <i data-feather="search" class="me-2"></i>Explore Startups
+                        </a>
+                        <a href="{{ url_for('messages') }}" class="btn btn-outline-info">
+                            <i data-feather="message-circle" class="me-2"></i>Messages
+                        </a>
+                        <a href="{{ url_for('connections') }}" class="btn btn-outline-success">
+                            <i data-feather="users" class="me-2"></i>Connections
+                        </a>
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                            <i data-feather="user" class="me-2"></i>Edit Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if show_conversation %}
+        Conversation with {{ other_user.full_name }} - StartupConnect
+    {% else %}
+        Messages & Connections - StartupConnect
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    {% if show_conversation %}
+    <!-- Conversation View -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Conversation Header -->
+            <div class="d-flex align-items-center mb-4">
+                <a href="{{ url_for('messages') }}" class="btn btn-outline-secondary me-3">
+                    <i data-feather="arrow-left" class="me-1"></i>Back
+                </a>
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i data-feather="user" class="text-white" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0">{{ other_user.full_name }}</h4>
+                        <small class="text-muted">{{ other_user.user_type|title }} • {{ other_user.location }}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Messages -->
+            <div class="card border-0 shadow-sm mb-4" style="height: 400px;">
+                <div class="card-body d-flex flex-column">
+                    <div class="flex-grow-1 overflow-auto mb-3" id="messagesContainer">
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="d-flex {% if message.sender_id == get_current_user().id %}justify-content-end{% else %}justify-content-start{% endif %} mb-3">
+                                <div class="{% if message.sender_id == get_current_user().id %}bg-primary text-white{% else %}bg-light{% endif %} rounded px-3 py-2 max-width-75">
+                                    <p class="mb-1">{{ message.content }}</p>
+                                    <small class="{% if message.sender_id == get_current_user().id %}text-white-50{% else %}text-muted{% endif %}">
+                                        {{ message.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i data-feather="message-circle" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                                <h6 class="text-muted">No messages yet</h6>
+                                <p class="text-muted small">Start the conversation by sending a message below</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Message Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="row g-2">
+                            <div class="col">
+                                {{ form.content(class="form-control" + (" is-invalid" if form.content.errors else ""), placeholder="Type your message here...", rows="2") }}
+                                {% if form.content.errors %}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.content.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-auto">
+                                {{ form.submit(class="btn btn-primary h-100") }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Messages & Connections Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-2">Messages & Connections</h1>
+            <p class="text-muted">Manage your conversations and connection requests</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Conversations -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="message-circle" class="me-2"></i>Conversations
+                    </h5>
+                    <span class="badge bg-primary">{{ conversations|length }}</span>
+                </div>
+                <div class="card-body">
+                    {% if conversations %}
+                        {% for conversation in conversations %}
+                        <div class="d-flex align-items-center p-3 border-bottom conversation-item">
+                            <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i data-feather="user" class="text-white" style="width: 20px; height: 20px;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    <a href="{{ url_for('conversation', user_id=conversation.user.id) }}" class="text-decoration-none">
+                                        {{ conversation.user.full_name }}
+                                    </a>
+                                </h6>
+                                <p class="text-muted small mb-1">{{ conversation.user.user_type|title }}</p>
+                                {% if conversation.latest_message %}
+                                <p class="small text-muted mb-0">
+                                    {{ conversation.latest_message.content[:50] }}{% if conversation.latest_message.content|length > 50 %}...{% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                {% if conversation.latest_message %}
+                                <small class="text-muted">{{ conversation.latest_message.created_at.strftime('%b %d') }}</small>
+                                {% endif %}
+                                <br>
+                                <a href="{{ url_for('conversation', user_id=conversation.user.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i data-feather="message-circle" class="me-1"></i>Chat
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="message-circle" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                            <h6 class="text-muted">No conversations yet</h6>
+                            <p class="text-muted small">Start connecting with startups to begin conversations</p>
+                            <a href="{{ url_for('search') }}" class="btn btn-primary">
+                                <i data-feather="search" class="me-2"></i>Explore Startups
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connections/Requests -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="users" class="me-2"></i>Connection Requests
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Received Requests -->
+                    {% if received_connections %}
+                    <h6 class="mb-3">
+                        <i data-feather="inbox" class="me-1"></i>Received
+                        <span class="badge bg-success ms-2">{{ received_connections|length }}</span>
+                    </h6>
+                    
+                    {% for connection in received_connections %}
+                    {% if connection.status == 'pending' %}
+                    <div class="card border border-success mb-3">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <i data-feather="user" class="text-white" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        {% set sender = get_user_by_id(connection.sender_id) %}
+                                        <h6 class="mb-0">{{ sender.full_name }}</h6>
+                                        <small class="text-muted">{{ sender.user_type|title }}</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-warning">Pending</span>
+                            </div>
+                            
+                            <p class="small mb-3">{{ connection.message }}</p>
+                            
+                            {% if connection.startup_id %}
+                            {% set startup = get_startup_by_id(connection.startup_id) %}
+                            <p class="small text-muted mb-3">
+                                <i data-feather="briefcase" class="me-1"></i>
+                                Interested in: <strong>{{ startup.name }}</strong>
+                            </p>
+                            {% endif %}
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('respond_connection', connection_id=connection.id, action='accept') }}" class="btn btn-success btn-sm">
+                                    <i data-feather="check" class="me-1"></i>Accept
+                                </a>
+                                <a href="{{ url_for('respond_connection', connection_id=connection.id, action='decline') }}" class="btn btn-outline-secondary btn-sm">
+                                    <i data-feather="x" class="me-1"></i>Decline
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Sent Requests -->
+                    {% if sent_connections %}
+                    <h6 class="mb-3 {% if received_connections %}mt-4{% endif %}">
+                        <i data-feather="send" class="me-1"></i>Sent
+                        <span class="badge bg-info ms-2">{{ sent_connections|length }}</span>
+                    </h6>
+                    
+                    {% for connection in sent_connections[-5:] %}
+                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-info rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px;">
+                                <i data-feather="user" class="text-white" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div>
+                                {% set receiver = get_user_by_id(connection.receiver_id) %}
+                                <p class="mb-0 small">{{ receiver.full_name }}</p>
+                                {% if connection.startup_id %}
+                                {% set startup = get_startup_by_id(connection.startup_id) %}
+                                <small class="text-muted">{{ startup.name }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ 'success' if connection.status == 'accepted' else 'danger' if connection.status == 'declined' else 'warning' }}">
+                                {{ connection.status|title }}
+                            </span>
+                            <br>
+                            <small class="text-muted">{{ connection.created_at.strftime('%b %d') }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Empty State -->
+                    {% if not received_connections and not sent_connections %}
+                    <div class="text-center py-4">
+                        <i data-feather="users" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                        <h6 class="text-muted">No connection requests</h6>
+                        <p class="text-muted small">Connect with startups to start building your network</p>
+                        <a href="{{ url_for('search') }}" class="btn btn-primary">
+                            <i data-feather="search" class="me-2"></i>Find Startups
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.max-width-75 {
+    max-width: 75%;
+}
+
+.conversation-item {
+    transition: background-color 0.2s ease;
+}
+
+.conversation-item:hover {
+    background-color: var(--bs-light);
+}
+
+#messagesContainer {
+    scroll-behavior: smooth;
+}
+</style>
+
+<script>
+// Auto-scroll to bottom of messages
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('messagesContainer');
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+});
+</script>
+{% endblock %}

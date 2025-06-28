@@ -1,0 +1,197 @@
+/* Custom styles for StartupConnect - minimal overrides to Bootstrap theme */
+
+/* Utility Classes */
+.max-width-75 {
+    max-width: 75%;
+}
+
+/* Card Hover Effects */
+.startup-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.startup-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Conversation Items */
+.conversation-item {
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.conversation-item:hover {
+    background-color: var(--bs-gray-100);
+}
+
+[data-bs-theme="dark"] .conversation-item:hover {
+    background-color: var(--bs-gray-800);
+}
+
+/* Message Container Styling */
+#messagesContainer {
+    scroll-behavior: smooth;
+}
+
+/* Timeline Styling for Profile Activity */
+.timeline {
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 16px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--bs-border-color);
+}
+
+.timeline .d-flex:last-child .timeline::before {
+    display: none;
+}
+
+/* Navigation Enhancement */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Badge Styling */
+.badge {
+    font-weight: 500;
+}
+
+/* Button Enhancements */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+/* Card Enhancements */
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    font-weight: 600;
+}
+
+/* Form Enhancements */
+.form-control, .form-select {
+    border-radius: 0.5rem;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Alert Enhancements */
+.alert {
+    border-radius: 0.75rem;
+    border: none;
+}
+
+/* Hero Section Enhancements */
+.bg-primary {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, rgba(var(--bs-primary-rgb), 0.8) 100%) !important;
+}
+
+/* Responsive Text Sizing */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .display-5 {
+        font-size: 1.75rem;
+    }
+}
+
+/* Loading States */
+.btn[disabled] {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+/* Custom Scrollbar for Messages */
+#messagesContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#messagesContainer::-webkit-scrollbar-track {
+    background: var(--bs-gray-100);
+    border-radius: 3px;
+}
+
+#messagesContainer::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-400);
+    border-radius: 3px;
+}
+
+#messagesContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-500);
+}
+
+[data-bs-theme="dark"] #messagesContainer::-webkit-scrollbar-track {
+    background: var(--bs-gray-800);
+}
+
+[data-bs-theme="dark"] #messagesContainer::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-600);
+}
+
+[data-bs-theme="dark"] #messagesContainer::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-500);
+}
+
+/* Focus States */
+.form-control:focus {
+    border-color: var(--bs-primary);
+}
+
+/* Animation for new messages */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-animation {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Status indicators */
+.status-online {
+    position: relative;
+}
+
+.status-online::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: var(--bs-success);
+    border: 2px solid var(--bs-body-bg);
+    border-radius: 50%;
+}
+
+/* Interactive elements */
+.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clickable:hover {
+    opacity: 0.8;
+}

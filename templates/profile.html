@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - StartupConnect{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-4">
+            <!-- Profile Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i data-feather="user" class="text-white" style="width: 40px; height: 40px;"></i>
+                        </div>
+                    </div>
+                    
+                    <h4 class="mb-1">{{ user.full_name }}</h4>
+                    <p class="text-muted mb-2">@{{ user.username }}</p>
+                    
+                    <span class="badge bg-{{ 'warning' if user.user_type == 'founder' else 'success' if user.user_type == 'investor' else 'info' if user.user_type == 'partner' else 'primary' }} mb-3">
+                        {{ user.user_type|title }}
+                    </span>
+                    
+                    <div class="row text-center border-top pt-3 mt-3">
+                        <div class="col-4">
+                            <h6 class="mb-0">{{ data_store.get_startups_by_founder(user.id)|length }}</h6>
+                            <small class="text-muted">Startups</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="mb-0">{{ data_store.get_connections_for_user(user.id)|length }}</h6>
+                            <small class="text-muted">Connections</small>
+                        </div>
+                        <div class="col-4">
+                            <h6 class="mb-0">{{ data_store.get_conversations_for_user(user.id)|length }}</h6>
+                            <small class="text-muted">Messages</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Info -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i data-feather="info" class="me-2"></i>Contact Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="mail" class="text-muted me-2"></i>
+                            <span>{{ user.email }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if user.location %}
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="map-pin" class="text-muted me-2"></i>
+                            <span>{{ user.location }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.industry %}
+                    <div class="mb-0">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="briefcase" class="text-muted me-2"></i>
+                            <span>{{ user.industry|title }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <!-- About Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="user" class="me-2"></i>About
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user.bio %}
+                        <p class="mb-4">{{ user.bio }}</p>
+                    {% else %}
+                        <p class="text-muted mb-4">No bio provided yet.</p>
+                    {% endif %}
+                    
+                    {% if user.experience %}
+                    <h6 class="mb-3">Experience & Expertise</h6>
+                    <p class="mb-0">{{ user.experience }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Startups Section (for founders) -->
+            {% if user.user_type == 'founder' %}
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="briefcase" class="me-2"></i>My Startups
+                    </h5>
+                    <a href="{{ url_for('create_startup') }}" class="btn btn-primary btn-sm">
+                        <i data-feather="plus" class="me-1"></i>Add Startup
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% set user_startups = data_store.get_startups_by_founder(user.id) %}
+                    {% if user_startups %}
+                        <div class="row g-3">
+                            {% for startup in user_startups %}
+                            <div class="col-md-6">
+                                <div class="card border">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="mb-0">
+                                                <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="text-decoration-none">
+                                                    {{ startup.name }}
+                                                </a>
+                                            </h6>
+                                            <span class="badge bg-secondary">{{ startup.stage|title }}</span>
+                                        </div>
+                                        
+                                        <p class="text-muted small mb-2">
+                                            {{ startup.description[:80] }}{% if startup.description|length > 80 %}...{% endif %}
+                                        </p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i data-feather="map-pin" class="me-1" style="width: 12px; height: 12px;"></i>
+                                                {{ startup.location }}
+                                            </small>
+                                            <a href="{{ url_for('startup_detail', startup_id=startup.id) }}" class="btn btn-outline-primary btn-sm">
+                                                View
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i data-feather="briefcase" class="text-muted mb-3" style="width: 64px; height: 64px;"></i>
+                            <h6 class="text-muted">No startups yet</h6>
+                            <p class="text-muted small">Create your first startup profile to showcase your work</p>
+                            <a href="{{ url_for('create_startup') }}" class="btn btn-primary">
+                                <i data-feather="plus" class="me-2"></i>Create Startup
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Activity Timeline -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="activity" class="me-2"></i>Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% set user_connections = data_store.get_connections_for_user(user.id) %}
+                    {% set user_startups = data_store.get_startups_by_founder(user.id) %}
+                    
+                    <div class="timeline">
+                        {% for startup in user_startups[-3:] %}
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="me-3 mt-1">
+                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i data-feather="briefcase" class="text-white" style="width: 16px; height: 16px;"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1">Created startup <strong>{{ startup.name }}</strong></p>
+                                <small class="text-muted">{{ startup.created_at.strftime('%B %d, %Y') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% for connection in user_connections[-3:] %}
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="me-3 mt-1">
+                                <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i data-feather="user-plus" class="text-white" style="width: 16px; height: 16px;"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1">
+                                    {% if connection.sender_id == user.id %}
+                                        Sent connection request to {{ get_user_by_id(connection.receiver_id).full_name }}
+                                    {% else %}
+                                        Received connection request from {{ get_user_by_id(connection.sender_id).full_name }}
+                                    {% endif %}
+                                </p>
+                                <small class="text-muted">{{ connection.created_at.strftime('%B %d, %Y') }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        <div class="d-flex align-items-start">
+                            <div class="me-3 mt-1">
+                                <div class="bg-info rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i data-feather="user-check" class="text-white" style="width: 16px; height: 16px;"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1">Joined StartupConnect</p>
+                                <small class="text-muted">{{ user.created_at.strftime('%B %d, %Y') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
