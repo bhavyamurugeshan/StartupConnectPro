@@ -30,3 +30,18 @@
    ```bash
    git clone https://github.com/bhavyamurugeshan/StartupConnectPro.git
    cd StartupConnectPro
+
+StartupConnectPro/
+├── app.py            — App initialization
+├── main.py           — Main entry point (if separated)
+├── routes.py         — Flask routes for pages & forms
+├── forms.py          — WTForms form definitions
+├── models.py         — SQLAlchemy database models
+├── data_store.py     — Database connection & session management
+├── templates/        — Jinja2 HTML templates
+├── static/           — CSS, JS, images, assets
+├── pyproject.toml    — Poetry project config & dependencies
+├── requirements.txt  — (Optional) pip dependencies
+├── replit.md         — Replit-specific setup guide
+└── LICENSE           — MIT license
+
